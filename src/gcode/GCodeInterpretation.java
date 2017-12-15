@@ -49,13 +49,9 @@ public class GCodeInterpretation {
 	         // Celle-ci se produit lors d'une erreur d'écriture ou de lecture
 	         e.printStackTrace();
 	      } finally {
-
 	         // On ferme nos flux de données dans un bloc finally pour s'assurer
-
 	         // que ces instructions seront exécutées dans tous les cas même si
-
 	         // une exception est levée !
-
 	         try {
 	            if (fis != null)
 	               fis.close();
