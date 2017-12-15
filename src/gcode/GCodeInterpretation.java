@@ -57,9 +57,7 @@ public class GCodeInterpretation {
 	         // une exception est levée !
 
 	         try {
-
 	            if (fis != null)
-
 	               fis.close();
 
 	         } catch (IOException e) {
