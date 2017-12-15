@@ -63,14 +63,8 @@ public class GCodeInterpretation {
 	               fis.close();
 
 	         } catch (IOException e) {
-
 	            e.printStackTrace();
-
 	         }
-
-
 	      }
-
 	   }
-
 	}
