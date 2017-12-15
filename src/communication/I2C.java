@@ -9,8 +9,6 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 import com.pi4j.platform.PlatformAlreadyAssignedException;
 import com.pi4j.util.Console;
 
-/*classe de gestion de l'I2C*/
-
 public class I2C {
 
 	final Console console = new Console();
