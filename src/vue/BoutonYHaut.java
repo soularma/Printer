@@ -29,19 +29,11 @@ public class BoutonYHaut extends JButton implements MouseListener{
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {}
-	
-	public int getPosBouton() {
-		return this.position.getY();
-	}
-
-	public void setPosBouton(int coordonnee) {
-		this.position.setY(coordonnee);
-	}
 
 	@Override
 	public void mousePressed(MouseEvent event) {
 		this.setIcon(imgAppui);
-		this.setPosBouton(this.getPosBouton() + 1);
+		this.position.setY(this.position.getY() + 1);
 	}
 
 	@Override
