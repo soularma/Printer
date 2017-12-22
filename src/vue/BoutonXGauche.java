@@ -15,7 +15,12 @@ public class BoutonXGauche extends JButton implements MouseListener{
 	public Position position = new Position();
 	
 	public BoutonXGauche(int X) {
-		position.setX(X);
+		this.position.setX(X);
+		this.setIcon(img);
+		this.addMouseListener(this);
+	}
+	public BoutonXGauche() {
+		this.position.setX(Position.POSITION_X_DEFAUT);
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}
@@ -28,19 +33,12 @@ public class BoutonXGauche extends JButton implements MouseListener{
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {}
-	
-	public int getPosBouton() {
-		return this.position.getX();
-	}
 
-	public void setPosBouton(int coordonnee) {
-		this.position.setX(coordonnee);
-	}
 
 	@Override
 	public void mousePressed(MouseEvent event) {
 		this.setIcon(imgAppui);
-		this.setPosBouton(this.getPosBouton() - 1);
+		this.position.setX(this.position.getX() - 1);
 	}
 
 	@Override

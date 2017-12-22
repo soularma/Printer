@@ -8,9 +8,6 @@ import javax.swing.JButton;
 
 public class BoutonYBas extends JButton implements MouseListener{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private ImageIcon img = new ImageIcon("Icons/down.png");
 	private ImageIcon imgAppui = new ImageIcon("Icons/downBlue.png");
@@ -18,7 +15,13 @@ public class BoutonYBas extends JButton implements MouseListener{
 	public Position position = new Position();
 	
 	public BoutonYBas(int Y) {
-		position.setX(Y);
+		this.position.setX(Y);
+		this.setIcon(img);
+		this.addMouseListener(this);
+	}
+	
+	public BoutonYBas() {
+		this.position.setY(Position.POSITION_Y_DEFAUT);
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}

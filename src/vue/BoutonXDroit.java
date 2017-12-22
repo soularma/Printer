@@ -9,13 +9,19 @@ import javax.swing.JButton;
 public class BoutonXDroit extends JButton implements MouseListener{
 
 	private static final long serialVersionUID = 1L;
-	private ImageIcon img = new ImageIcon("Icons/left.png");
-	private ImageIcon imgAppui = new ImageIcon("Icons/leftBlue.png");
+	private ImageIcon img = new ImageIcon("Icons/right.png");
+	private ImageIcon imgAppui = new ImageIcon("Icons/rightBLue.png");
 	
 	public Position position = new Position();
 	
 	public BoutonXDroit(int X) {
-		position.setX(X);
+		this.position.setX(X);
+		this.setIcon(img);
+		this.addMouseListener(this);
+	}
+	
+	public BoutonXDroit() {
+		this.position.setX(Position.POSITION_X_DEFAUT);
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}
@@ -28,14 +34,6 @@ public class BoutonXDroit extends JButton implements MouseListener{
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {}
-	
-	public int getPosBouton() {
-		return this.position.getX();
-	}
-
-	public void setPosBouton(int coordonnee) {
-		this.position.setZ(coordonnee);
-	}
 
 	@Override
 	public void mousePressed(MouseEvent event) {

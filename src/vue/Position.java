@@ -1,6 +1,14 @@
 package vue;
 import com.pi4j.util.Console;
 
+import vue.BoutonXDroit;
+import vue.BoutonXGauche;
+import vue.BoutonYBas;
+import vue.BoutonYHaut;
+import vue.BoutonZBas;
+import vue.BoutonZHaut;
+
+
 public class Position {
 
 		public static final int POSITION_X_DEFAUT = 0;
@@ -9,16 +17,20 @@ public class Position {
 		public static final int POSITION_U_DEFAUT = 0;
 		public static final int POSITION_V_DEFAUT = 0;
 		public static final int POSITION_W_DEFAUT = 0;
+		
+		
 
 		private int x,y,z,u,v,w;
-	
+		
+		//Les variables u,v et w ne peuvent être comprisent qu'entre -180 et 180. (Calculé en degré) 
 		public Position(int x, int y, int z, int u, int v, int w) {
 			this.x=x;
 			this.y=y;
 			this.z=z;
-			this.u=u;
-			this.v=v;
-			this.w=w;
+			
+			this.u = orientationMax(u);
+			this.v = orientationMax(v);
+			this.w = orientationMax(w);
 		}
 		
 		public Position(int x, int y, int z, int u, int v) {
@@ -80,7 +92,7 @@ public class Position {
 			this.w=W;
 		}
 		
-		public String toString() {
+		public String affichePos() {
 			String info = "X=" + this.getX() + "  Y=" + this.getY() + "  Z=" + this.getZ() + "  U=" + this.getU() 
 			+ "  V=" + this.getV() + "  W=" + this.getW() ;
 			return info;
@@ -92,4 +104,18 @@ public class Position {
 			console.println("X : " + this.getX() + " Y : " + this.getY() + " Z : " + this.getZ());
 			console.println("U : " + this.getU() + " V : " + this.getU() + " W : " + this.getW());		
 		}
+		
+		public int orientationMax(int axe) {
+			if (axe > 180 || axe < -180) {
+				if(axe > 180) 
+				 axe = 180;
+				else
+				 axe = -180;
+			return axe;
+			}else 
+				return axe;
+		}
+		
+		
+		
 }

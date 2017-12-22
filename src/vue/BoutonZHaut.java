@@ -16,7 +16,13 @@ public class BoutonZHaut extends JButton implements MouseListener{
 	public Position position = new Position();
 	
 	public BoutonZHaut(int Z) {
-		position.setZ(Z);
+		this.position.setZ(Z);
+		this.setIcon(img);
+		this.addMouseListener(this);
+	}
+	
+	public BoutonZHaut() {
+		this.position.setZ(Position.POSITION_Z_DEFAUT);
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}

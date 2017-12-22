@@ -10,13 +10,19 @@ public class BoutonYHaut extends JButton implements MouseListener{
 
 
 	private static final long serialVersionUID = 1L;
-	private ImageIcon img = new ImageIcon("Icons/ZDown.png");
-	private ImageIcon imgAppui = new ImageIcon("Icons/ZDownBlue.png");
+	private ImageIcon img = new ImageIcon("Icons/up.png");
+	private ImageIcon imgAppui = new ImageIcon("Icons/upBlue.png");
 	
 	public Position position = new Position();
 	
 	public BoutonYHaut(int Y) {
-		position.setY(Y);
+		this.position.setY(Y);
+		this.setIcon(img);
+		this.addMouseListener(this);
+	}
+	
+	public BoutonYHaut() {
+		this.position.setY(Position.POSITION_Y_DEFAUT);
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}

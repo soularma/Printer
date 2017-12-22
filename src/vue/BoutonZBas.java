@@ -16,7 +16,13 @@ public class BoutonZBas extends JButton implements MouseListener{
 	public Position position = new Position();
 	
 	public BoutonZBas(int Z) {
-		position.setZ(Z);
+		this.position.setZ(Z);
+		this.setIcon(img);
+		this.addMouseListener(this);
+	}
+	
+	public BoutonZBas() {
+		this.position.setZ(Position.POSITION_Z_DEFAUT);
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}
