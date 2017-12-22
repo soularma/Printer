@@ -5,7 +5,6 @@ import com.pi4j.io.serial.*;
 import com.pi4j.util.Console;
 
 import java.io.IOException;
-import java.util.Date;
 
 /* Classe de gestion de l'Uart avec le PIC18F45k20*/
 

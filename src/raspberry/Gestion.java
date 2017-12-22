@@ -13,7 +13,5 @@ public class Gestion {
 
 		Uart uart = new Uart();
 		uart.write("Test");
-		
-		
 	}
 }
