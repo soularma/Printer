@@ -19,6 +19,7 @@ public class BoutonXGauche extends JButton implements MouseListener{
 		this.setIcon(img);
 		this.addMouseListener(this);
 	}
+	
 	public BoutonXGauche() {
 		this.position.setX(Position.POSITION_X_DEFAUT);
 		this.setIcon(img);

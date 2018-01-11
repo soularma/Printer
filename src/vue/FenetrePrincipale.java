@@ -1,17 +1,21 @@
 package vue;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
 	
@@ -20,13 +24,18 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	private JMenuBar menuBar = new JMenuBar();
 	private JPanel commandes = new JPanel();
+	private JPanel panneauGauche = new JPanel();
+	private JPanel panneauDroit = new JPanel();
+	private JPanel affichageGCode = new JPanel();
 	
 	private JMenu fichier = new JMenu("Fichier");
 	private JMenu aide = new JMenu("Aide");
 	private JMenuItem info = new JMenu("Informations");
 	private JMenuItem quitter = new JMenuItem("Quitter");
 	
+	
 	public JLabel positionLabel = new JLabel();
+	private JEditorPane editor = new JEditorPane();
 	
 	private BoutonXGauche boutonGauche = new BoutonXGauche();
 	private BoutonXDroit boutonDroit = new BoutonXDroit();
@@ -38,6 +47,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private BoutonUArriere boutonUGauche = new BoutonUArriere();
 	private BoutonVAvant boutonVDroit = new BoutonVAvant();
 	private BoutonVArriere boutonVGauche = new BoutonVArriere();
+	private BoutonUSB boutonUSB = new BoutonUSB();
 	
 	
 	public FenetrePrincipale() {
@@ -63,19 +73,14 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				boutonUGauche.addActionListener(this);
 				boutonVDroit.addActionListener(this);
 				boutonVGauche.addActionListener(this);
-								
-								
-				/*commandes.add(boutonBas);
-				commandes.add(boutonHaut);
-				commandes.add(boutonGauche);
-				commandes.add(boutonDroit);
-				commandes.add(boutonZBas);
-				commandes.add(boutonZHaut);
-				commandes.add(boutonUDroit);
-				commandes.add(boutonUGauche);
-				commandes.add(boutonVDroit);
-				commandes.add(boutonVGauche);
-				commandes.add(positionLabel);*/
+				boutonUSB.addActionListener(this);
+
+				affichageGCode.add(editor, BorderLayout.CENTER);
+				panneauGauche.add(affichageGCode,BorderLayout.SOUTH);
+				
+				panneauDroit.add(positionLabel);
+				panneauDroit.add(boutonUSB);
+				panneauDroit.add(commandes);
 				
 				commandes.setLayout(new GridBagLayout());
 				GridBagConstraints gbc = new GridBagConstraints();
@@ -119,15 +124,15 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					gbc.gridx = 4;
 					gbc.gridy = 2;
 					commandes.add(boutonZBas, gbc);		
-					
-					gbc.gridx = 5;
-					gbc.gridy = 5;
-					commandes.add(positionLabel,gbc);
-					
 				
 	
 	afficherMenu();
-	this.setContentPane(commandes);
+	commandes.setBackground(Color.CYAN);
+	panneauDroit.setBackground(Color.green);
+	panneauGauche.setBackground(Color.blue);
+	affichageGCode.setBackground(Color.ORANGE);	
+	this.getContentPane().add(panneauGauche,BorderLayout.WEST);
+	this.getContentPane().add(panneauDroit,BorderLayout.EAST);
 	this.setVisible(true);
 		
 	}
@@ -189,7 +194,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		}
 		if(arg0.getSource() == boutonUGauche) {
 			this.currentPosition.setU(boutonUGauche.position.getU());
-			this.boutonUDroit.position.setZ(this.boutonUGauche.position.getU());
+			this.boutonUDroit.position.setU(this.boutonUGauche.position.getU());
 			this.positionLabel.setText(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonVDroit) {
@@ -201,6 +206,9 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.currentPosition.setV(boutonVGauche.position.getV());
 			this.boutonVDroit.position.setV(this.boutonVGauche.position.getV());
 			this.positionLabel.setText(currentPosition.affichePos());
+		}
+		if(arg0.getSource() == boutonUSB) {
+			
 		}
 		
 	}
