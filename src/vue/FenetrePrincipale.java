@@ -2,19 +2,26 @@ package vue;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.NumberFormat;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
@@ -22,19 +29,37 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	public Position currentPosition = new Position();
 	
 	private static final long serialVersionUID = 1L;
-	private JMenuBar menuBar = new JMenuBar();
+		
+	private JPanel panneauGauche = new JPanel(new BorderLayout());
+	private JPanel panneauDroit = new JPanel(new BorderLayout());
 	private JPanel commandes = new JPanel();
-	private JPanel panneauGauche = new JPanel();
-	private JPanel panneauDroit = new JPanel();
-	private JPanel affichageGCode = new JPanel();
+	private JPanel infoPosition = new JPanel();
+	private JPanel parametre = new JPanel();
+
+	private JMenuBar menuBar = new JMenuBar();
 	
 	private JMenu fichier = new JMenu("Fichier");
 	private JMenu aide = new JMenu("Aide");
 	private JMenuItem info = new JMenu("Informations");
 	private JMenuItem quitter = new JMenuItem("Quitter");
 	
+	private JFormattedTextField tempLitChauffant = new JFormattedTextField(NumberFormat.getIntegerInstance());
+	private JFormattedTextField tempExtr1 = new JFormattedTextField(NumberFormat.getIntegerInstance());
+	private JFormattedTextField tempExtr2 = new JFormattedTextField(NumberFormat.getIntegerInstance());
+	private JFormattedTextField tempExtr3 = new JFormattedTextField(NumberFormat.getIntegerInstance());
+	private JFormattedTextField tempExtr4 = new JFormattedTextField(NumberFormat.getIntegerInstance());
+	private JFormattedTextField tempExtr5 = new JFormattedTextField(NumberFormat.getIntegerInstance());
+
+	private JLabel temperature = new JLabel("Paramétrage Température");
+	private JLabel tempAmbiant = new JLabel("Température Ambiante");
+	private JLabel litChauffant = new JLabel("Température du lit chauffant");
+	private JLabel extr1 = new JLabel("Extrudeur n°1");
+	private JLabel extr2 = new JLabel("Extrudeur n°2");
+	private JLabel extr3 = new JLabel("Extrudeur n°3");
+	private JLabel extr4 = new JLabel("Extrudeur n°4");
+	private JLabel extr5 = new JLabel("Extrudeur n°5");
+	private JLabel positionLabel = new JLabel();
 	
-	public JLabel positionLabel = new JLabel();
 	private JEditorPane editor = new JEditorPane();
 	
 	private BoutonXGauche boutonGauche = new BoutonXGauche();
@@ -49,18 +74,23 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private BoutonVArriere boutonVGauche = new BoutonVArriere();
 	private BoutonUSB boutonUSB = new BoutonUSB();
 	
+	private JButton valider = new JButton();
 	
 	public FenetrePrincipale() {
+
 		
 		this.setTitle("Printer");
-		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1920,1080);
+
+		//Mettre en mode plein écran
+		/*this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		this.setUndecorated(true);
+		this.setVisible(true);*/
 		
 		Font font = new Font("Tahoma", Font.BOLD, 20);
 		positionLabel.setFont(font);
 		positionLabel.setText(this.currentPosition.affichePos());
-	
 		
 				//attente d'action avec la souris
 				boutonGauche.addActionListener(this);
@@ -74,14 +104,30 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				boutonVDroit.addActionListener(this);
 				boutonVGauche.addActionListener(this);
 				boutonUSB.addActionListener(this);
+				valider.addActionListener(this);	
+				
+				infoPosition.setLayout(new BoxLayout(infoPosition,BoxLayout.Y_AXIS));
+				infoPosition.add(positionLabel);
+				infoPosition.add(boutonUSB);
+				parametre.setLayout(new BoxLayout(parametre,BoxLayout.Y_AXIS));
+				valider.setText("Valider");
+				parametre.add(temperature);
+				parametre.add(tempAmbiant);
+				parametre.add(litChauffant);
+				parametre.add(tempLitChauffant);
+				parametre.add(extr1);
+				parametre.add(tempExtr1);
+				parametre.add(extr2);
+				parametre.add(tempExtr2);
+				parametre.add(extr3);
+				parametre.add(tempExtr3);
+				parametre.add(extr4);
+				parametre.add(tempExtr4);
+				parametre.add(extr5);
+				parametre.add(tempExtr5);
+				parametre.add(valider);
 
-				affichageGCode.add(editor, BorderLayout.CENTER);
-				panneauGauche.add(affichageGCode,BorderLayout.SOUTH);
-				
-				panneauDroit.add(positionLabel);
-				panneauDroit.add(boutonUSB);
-				panneauDroit.add(commandes);
-				
+		
 				commandes.setLayout(new GridBagLayout());
 				GridBagConstraints gbc = new GridBagConstraints();
 				
@@ -124,13 +170,27 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					gbc.gridx = 4;
 					gbc.gridy = 2;
 					commandes.add(boutonZBas, gbc);		
+					
+				editor.setAutoscrolls(true);
+				editor.setSize(getMaximumSize());
+				panneauGauche.add(editor,BorderLayout.CENTER);	
+
+				panneauDroit.add(commandes,BorderLayout.NORTH);
+				panneauDroit.add(parametre,BorderLayout.SOUTH);
+				panneauDroit.add(infoPosition,BorderLayout.CENTER);
 				
-	
 	afficherMenu();
 	commandes.setBackground(Color.CYAN);
 	panneauDroit.setBackground(Color.green);
 	panneauGauche.setBackground(Color.blue);
-	affichageGCode.setBackground(Color.ORANGE);	
+	editor.setBackground(Color.ORANGE);	
+	parametre.setBackground(Color.PINK);
+	
+	
+	/*container.add(panneauDroit,BorderLayout.EAST);
+	container.add(panneauGauche, BorderLayout.WEST);
+	container = this.getContentPane();*/
+	
 	this.getContentPane().add(panneauGauche,BorderLayout.WEST);
 	this.getContentPane().add(panneauDroit,BorderLayout.EAST);
 	this.setVisible(true);
@@ -208,8 +268,12 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.positionLabel.setText(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonUSB) {
-			
+			//TODO
 		}
+		if(arg0.getSource() == valider) {
+			//TODO
+		}
+		
 		
 	}
 }
