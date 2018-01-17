@@ -58,7 +58,7 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 			public void actionPerformed(ActionEvent arg0) {
 				if(arg0.getSource() == valider) {
 					getSelectedFile();
-					System.exit(0);
+					//System.exit(0);
 				}				
 			}			
 		});
