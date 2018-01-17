@@ -269,11 +269,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		}
 		if(arg0.getSource() == boutonUSB) {
 			//TODO
-		}
-		if(arg0.getSource() == valider) {
-			//TODO
-		}
-		
+		}		
 		
 	}
 }
