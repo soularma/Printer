@@ -6,14 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.math.*;
+import communication.PCA9685;
 
 
 
     
-public class GCodeInterpretation {
-	 public static void main(String[] args) {
+public class GCodeInterpretation extends raspberry.Moteur{
+		private static PCA9685 servoBoard;
+	 public static void GCodeInterpratation() {
 	      // Nous déclarons nos objets en dehors du bloc try/catch
 	      FileInputStream fis = null;
+
+
 
 	      try {
 	         fis = new FileInputStream(new File("test.txt"));
@@ -35,7 +39,7 @@ public class GCodeInterpretation {
 
 	            for (byte bit : buf) {
 	               System.out.print("\t" + bit + "(" + (char) bit + ")");
-	               int indice = 0, somme =0, valeur = -1;
+	               int somme =0, valeur = -1;
 	               ArrayList<Integer> param = new ArrayList();
 	               byte sauvegarde = 0;
 	               if( bit > 64 && bit < 122){
@@ -89,18 +93,21 @@ public class GCodeInterpretation {
 		            	   break;
 		               case 84:	//sélection outils commande T
 		            	   System.out.print("Selection outils");
+		            	   servoBoard.setChannel(somme);
 		            	   break;
 		               case 83:	//vitesse de broche commande S
 		            	   System.out.print("Vitesse broche");
 		            	   break;
-		               case 70:	//vitesse de déplacement, commande F
+		               case 70:	//vitesse de déplacement, commande F, mm/s
 		            	   System.out.print("Vitesse déplacement");
+		            	   servoBoard.setVitesse(somme);
 		            	   break;
 		               case 77:	//code fonction machine, commande M
 		            	   System.out.print("Fonction ");
 		            	   break;
 		               case 80:	//temps de pause, Commande P
 		            	   System.out.print("Pause");
+		            	   servoBoard.waitfor(somme);
 		            	   break;
 		               /*case 'V':	//permet de contrôler une vitesse de rotation dans une machine avec diverses configurations
 		            	   break;*/
@@ -109,13 +116,16 @@ public class GCodeInterpretation {
 		               case 88: //X
 		            	   System.out.print("Axe X");
 		            	   //setX(somme);
+		            	   servoBoard.setChannel(0);
 		            	   break;
 		               case 89://Y
 		            	   System.out.print("Axe Y");
 		            	   //setY(somme)
+		            	   servoBoard.setChannel(1);
 		            	   break;
 		               case 90://Z
 		            	   System.out.print("Axe Z");
+		            	   servoBoard.setChannel(2);
 		            	   break;
 		               case 65:	//rotation auttour de l'axe X, commande A
 		            	   System.out.print("Rotation auttour de l'axe X");
@@ -128,12 +138,15 @@ public class GCodeInterpretation {
 		            	   break;
 		               case 85:	//position relative ou axe secondaire, commande U
 		            	   System.out.print("Axe U");
+		            	   servoBoard.setChannel(3);
 		            	   break;
 		               case 86:	//position relative ou axe secondaire, commande V
 		            	   System.out.print("Axe V");
+		            	   servoBoard.setChannel(4);
 		            	   break;
 		               case 87:	//position relative ou axe secondaire, commande W
 		            	   System.out.print("Axe W");
+		            	   servoBoard.setChannel(5);
 		            	   break;
 		            //////////////////////
 		               case 73:	//commande I
@@ -150,7 +163,7 @@ public class GCodeInterpretation {
 		            	   break;
 		
 		               case 82:	//paramètre pour la température, commande R
-		   
+		            	   	
 		            	   break;
 		               case 69:	//Longueur de matière extrudée, commande E
 		            	   
