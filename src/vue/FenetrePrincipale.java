@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.TreePath;
 
 import vue.explorateur.ExplorateurFichiers;
 
@@ -35,7 +36,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	
 	private static final long serialVersionUID = 1L;
 		
-	public String path;
+	public TreePath path;
 	
 	private JPanel panneauGauche = new JPanel(new BorderLayout());
 	private JPanel panneauDroit = new JPanel(new BorderLayout());
@@ -79,6 +80,9 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private BoutonUArriere boutonUGauche = new BoutonUArriere();
 	private BoutonVAvant boutonVDroit = new BoutonVAvant();
 	private BoutonVArriere boutonVGauche = new BoutonVArriere();
+	private JButton validerSelection = new JButton("Valider");
+
+	
 	private ExplorateurFichiers explorateurFichier;
 
 	
@@ -116,11 +120,24 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				valider.addActionListener(this);	
 				parcourir.addActionListener(this);
 				
-
-			
-					System.out.println("Fenetre Principale -- ");
-					this.setTextEditor(explorateurFichier.getSelectedPath());
 				
+				validerSelection.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						if(arg0.getSource() == validerSelection) {
+							System.out.println("-- Fenetre Principale : getSelectedPath --");
+							System.out.println(explorateurFichier.selectedPath);
+							
+							try {
+								//TODO
+							} catch (IOException e) {
+								System.out.println("Impossible d'ouvrir le fichier GCode !!");
+								e.printStackTrace();
+							}
+							editor.repaint();
+						}				
+					}			
+				});				
 				
 				//infos extrudeurs
 				infoPosition.setLayout(new BoxLayout(infoPosition,BoxLayout.Y_AXIS));
@@ -287,8 +304,8 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.positionLabel.setText(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == parcourir) {
-			this.explorateurFichier = new ExplorateurFichiers("/");	
-			
+			this.explorateurFichier = new ExplorateurFichiers("/");		
+			explorateurFichier.add(validerSelection);
 			}
 		}	
 	public void setTextEditor(String text) {

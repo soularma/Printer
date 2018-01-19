@@ -30,8 +30,7 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 	private JTree tree; 
 	private JTextArea infos;
 	private File file;
-	private static TreePath path;
-	private JButton valider = new JButton("Valider");
+	private TreePath path;
 	public  String selectedPath;
 	public FenetrePrincipale fen;
 	
@@ -52,7 +51,7 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 		getContentPane().setLayout(new GridLayout(1,2));
 		getContentPane().add(new JScrollPane(tree));
 		getContentPane().add(new JScrollPane(infos));
-		getContentPane().add(valider);
+		
 		
 		
 		setSize(700,600);
@@ -73,16 +72,7 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 		s += "Length : \n   "+file.length()+"\n";
 		s += "Last modified : \n   "+new Date(file.lastModified())+"\n";
 		infos.setText(s);
-		valider.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if(arg0.getSource() == valider) {
-					System.out.println("-- explorateurFichier : getSelectedPath --");
-					System.out.println(path.getLastPathComponent().toString());
-					selectedPath = path.getLastPathComponent().toString();
-				}				
-			}			
-		});
+		selectedPath = path.getLastPathComponent().toString();
 	}	
 	
 	public String getSelectedPath() {
