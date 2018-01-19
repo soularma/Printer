@@ -20,18 +20,24 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import vue.explorateur.ExplorateurFichiers;
-	
+import vue.FenetrePrincipale;
 
 public class BoutonUSB extends JButton implements MouseListener{
 	
 	private static final long serialVersionUID = 1L;
 	private ImageIcon img = new ImageIcon("Icons/usb.png");
 	private ImageIcon imgAppui = new ImageIcon("Icons/usbRed.png");
+	private ExplorateurFichiers explorateurFichier;
+	public FenetrePrincipale fenetrePrincipale;
+	private String path;
+	private boolean appui;
+
 	
 
-	public BoutonUSB() {
+	public BoutonUSB(boolean appui) {
 		this.setIcon(img);
 		this.addMouseListener(this);
+		this.appui=appui;
 	}
 
 	@Override
@@ -53,9 +59,23 @@ public class BoutonUSB extends JButton implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		this.setIcon(img);
+		appui=true;
 		System.out.println("Changement d'icone pour bouton USB");
-		ExplorateurFichiers explorateurFichier = new ExplorateurFichiers("/"); 
-		explorateurFichier.getSelectedFile();
+		 explorateurFichier = new ExplorateurFichiers("/");
+		 //System.out.println("-- boutonUSB -- getSelectedPath");
+		// System.out.println(explorateurFichier.getselectedPath());		
 	}
-
+	
+	public void setSelectedPath(String path) {
+		this.path=path;
+	}
+	public String getSelectedPath() {
+		return this.path;
+	}
+	public boolean getEnable() {
+		return appui;
+	}
+	public void setEnable(boolean appui) {
+		this.appui=appui;
+	}
 };

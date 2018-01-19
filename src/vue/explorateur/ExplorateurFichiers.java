@@ -1,12 +1,13 @@
 package vue.explorateur;
 
 import java.awt.GridLayout;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -14,10 +15,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import vue.explorateur.FileRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import vue.BoutonUSB;
+import vue.FenetrePrincipale;
 
 public class ExplorateurFichiers extends JFrame implements TreeSelectionListener{
 	
@@ -28,11 +30,13 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 	private JTree tree; 
 	private JTextArea infos;
 	private File file;
+	private static TreePath path;
 	private JButton valider = new JButton("Valider");
+	public  String selectedPath;
+	public FenetrePrincipale fen;
 	
 	public ExplorateurFichiers(String repertoire){
 		super("Explorateur de fichiers");	
-		
 		root = new File(repertoire);
 		modele = new FileTreeModel(root);
 		tree = new JTree(modele);
@@ -44,35 +48,23 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 		infos.setEditable(false);
 		infos.setLineWrap(true);
 		infos.setWrapStyleWord(true);
-		
-		this.getSelectedFile();
-		
+				
 		getContentPane().setLayout(new GridLayout(1,2));
 		getContentPane().add(new JScrollPane(tree));
 		getContentPane().add(new JScrollPane(infos));
 		getContentPane().add(valider);
 		
-		valider.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if(arg0.getSource() == valider) {
-					getSelectedFile();
-					//System.exit(0);
-				}				
-			}			
-		});
 		
-		
-		setSize(400,600);
+		setSize(700,600);
 		setLocationRelativeTo(null); 
 		setVisible(true);
 		
 	}
+
 	
 	public void valueChanged(TreeSelectionEvent e){
 		
-		TreePath path = e.getPath();
+		path = e.getPath();
 		file = (File)path.getLastPathComponent();
 		String s = "Can read : \n   "+file.canRead()+"\n";
 		s += "Can write : \n   "+file.canWrite()+"\n";
@@ -81,11 +73,20 @@ public class ExplorateurFichiers extends JFrame implements TreeSelectionListener
 		s += "Length : \n   "+file.length()+"\n";
 		s += "Last modified : \n   "+new Date(file.lastModified())+"\n";
 		infos.setText(s);
-		System.out.println(path.getLastPathComponent());
-	}
+		valider.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(arg0.getSource() == valider) {
+					System.out.println("-- explorateurFichier : getSelectedPath --");
+					System.out.println(path.getLastPathComponent().toString());
+					selectedPath = path.getLastPathComponent().toString();
+				}				
+			}			
+		});
+	}	
 	
-	public File getSelectedFile() {
-		return this.file;
+	public String getSelectedPath() {
+		return this.selectedPath;
 	}
 	
 }

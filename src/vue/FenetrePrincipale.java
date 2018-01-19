@@ -9,6 +9,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.text.NumberFormat;
 
 import javax.swing.BoxLayout;
@@ -21,7 +22,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.event.TreeSelectionEvent;
+
+import vue.explorateur.ExplorateurFichiers;
 
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
@@ -30,6 +35,8 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	
 	private static final long serialVersionUID = 1L;
 		
+	public String path;
+	
 	private JPanel panneauGauche = new JPanel(new BorderLayout());
 	private JPanel panneauDroit = new JPanel(new BorderLayout());
 	private JPanel commandes = new JPanel();
@@ -72,10 +79,12 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private BoutonUArriere boutonUGauche = new BoutonUArriere();
 	private BoutonVAvant boutonVDroit = new BoutonVAvant();
 	private BoutonVArriere boutonVGauche = new BoutonVArriere();
-	private BoutonUSB boutonUSB = new BoutonUSB();
+	private ExplorateurFichiers explorateurFichier;
+
 	
 	private JButton valider = new JButton();
-	
+	private JButton parcourir = new JButton("Parcourir...");
+
 	public FenetrePrincipale() {
 
 		
@@ -87,6 +96,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		/*this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		this.setUndecorated(true);
 		this.setVisible(true);*/
+		
 		
 		Font font = new Font("Tahoma", Font.BOLD, 20);
 		positionLabel.setFont(font);
@@ -103,12 +113,19 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				boutonUGauche.addActionListener(this);
 				boutonVDroit.addActionListener(this);
 				boutonVGauche.addActionListener(this);
-				boutonUSB.addActionListener(this);
 				valider.addActionListener(this);	
+				parcourir.addActionListener(this);
 				
+
+			
+					System.out.println("Fenetre Principale -- ");
+					this.setTextEditor(explorateurFichier.getSelectedPath());
+				
+				
+				//infos extrudeurs
 				infoPosition.setLayout(new BoxLayout(infoPosition,BoxLayout.Y_AXIS));
 				infoPosition.add(positionLabel);
-				infoPosition.add(boutonUSB);
+				infoPosition.add(parcourir);
 				parametre.setLayout(new BoxLayout(parametre,BoxLayout.Y_AXIS));
 				valider.setText("Valider");
 				parametre.add(temperature);
@@ -127,7 +144,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				parametre.add(tempExtr5);
 				parametre.add(valider);
 
-		
+				//boutons de commande des axes de l'imprimante
 				commandes.setLayout(new GridBagLayout());
 				GridBagConstraints gbc = new GridBagConstraints();
 				
@@ -169,15 +186,20 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					
 					gbc.gridx = 4;
 					gbc.gridy = 2;
-					commandes.add(boutonZBas, gbc);		
+					commandes.add(boutonZBas, gbc);
 					
+				
 				editor.setAutoscrolls(true);
 				editor.setSize(getMaximumSize());
+				JScrollPane editorScrollPane =new JScrollPane(editor);
+				editorScrollPane.setAutoscrolls(true);
+				panneauGauche.add(editorScrollPane);
 				panneauGauche.add(editor,BorderLayout.CENTER);	
 
 				panneauDroit.add(commandes,BorderLayout.NORTH);
 				panneauDroit.add(parametre,BorderLayout.SOUTH);
 				panneauDroit.add(infoPosition,BorderLayout.CENTER);
+		
 				
 	afficherMenu();
 	commandes.setBackground(Color.CYAN);
@@ -187,9 +209,6 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	parametre.setBackground(Color.PINK);
 	
 	
-	/*container.add(panneauDroit,BorderLayout.EAST);
-	container.add(panneauGauche, BorderLayout.WEST);
-	container = this.getContentPane();*/
 	
 	this.getContentPane().add(panneauGauche,BorderLayout.WEST);
 	this.getContentPane().add(panneauDroit,BorderLayout.EAST);
@@ -267,9 +286,12 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.boutonVDroit.position.setV(this.boutonVGauche.position.getV());
 			this.positionLabel.setText(currentPosition.affichePos());
 		}
-		if(arg0.getSource() == boutonUSB) {
-			//TODO
-		}		
-		
+		if(arg0.getSource() == parcourir) {
+			this.explorateurFichier = new ExplorateurFichiers("/");	
+			}
+		}	
+	public void setTextEditor(String text) {
+		this.editor.setText(text);
 	}
+
 }
