@@ -288,6 +288,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		}
 		if(arg0.getSource() == parcourir) {
 			this.explorateurFichier = new ExplorateurFichiers("/");	
+			
 			}
 		}	
 	public void setTextEditor(String text) {
