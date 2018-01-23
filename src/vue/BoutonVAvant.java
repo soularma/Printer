@@ -51,4 +51,8 @@ public class BoutonVAvant extends JButton implements MouseListener{
 		this.setIcon(img);
 	}
 
+	public void setOrigine() {
+		this.position.setOrigine();
+	}
+	
 }

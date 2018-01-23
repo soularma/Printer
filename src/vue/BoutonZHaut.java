@@ -50,5 +50,9 @@ public class BoutonZHaut extends JButton implements MouseListener{
 	public void mouseReleased(MouseEvent event) {
 		this.setIcon(img);
 	}
+	
+	public void setOrigine() {
+		this.position.setOrigine();
+	}
 
 }

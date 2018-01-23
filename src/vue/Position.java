@@ -18,7 +18,6 @@ public class Position {
 		public static final int POSITION_V_DEFAUT = 0;
 		public static final int POSITION_W_DEFAUT = 0;
 		
-		
 
 		private int x,y,z,u,v,w;
 		
@@ -43,6 +42,15 @@ public class Position {
 		
 		public Position(int x, int y) {
 			this(x,y,POSITION_Z_DEFAUT,POSITION_U_DEFAUT,POSITION_V_DEFAUT,POSITION_W_DEFAUT);
+		}
+		
+		public Position(Position position) {
+			this.x = position.getX();
+			this.y = position.getY();
+			this.z = position.getZ();
+			this.u = position.getU();
+			this.v = position.getV();
+			this.w = position.getW();
 		}
 		
 		public Position() {
@@ -90,6 +98,18 @@ public class Position {
 		}
 		public void setW(int W) {
 			this.w=W;
+		}
+		public void setOrigine() {
+			this.setPosition(new Position());
+		}
+		
+		public void setPosition(Position position) {
+			this.setX(position.getX());
+			this.setY(position.getY());
+			this.setZ(position.getZ());
+			this.setU(position.getU());
+			this.setV(position.getV());
+			this.setW(position.getW());
 		}
 		
 		public String affichePos() {

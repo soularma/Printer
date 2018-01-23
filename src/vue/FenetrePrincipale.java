@@ -2,19 +2,17 @@ package vue;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.text.NumberFormat;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,11 +21,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.event.TreeSelectionEvent;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.tree.TreePath;
 
-import vue.explorateur.ExplorateurFichiers;
+import vue.explorateur.EditeurText;
 
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
@@ -68,7 +67,9 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private JLabel extr5 = new JLabel("Extrudeur n°5");
 	private JLabel positionLabel = new JLabel();
 	
-	private JEditorPane editor = new JEditorPane();
+	private EditeurText editorText = new EditeurText();
+	JScrollPane scrollPrompt; 
+	public JTextArea console = new JTextArea();
 	
 	private BoutonXGauche boutonGauche = new BoutonXGauche();
 	private BoutonXDroit boutonDroit = new BoutonXDroit();
@@ -80,14 +81,10 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private BoutonUArriere boutonUGauche = new BoutonUArriere();
 	private BoutonVAvant boutonVDroit = new BoutonVAvant();
 	private BoutonVArriere boutonVGauche = new BoutonVArriere();
-	private JButton validerSelection = new JButton("Valider");
-
-	
-	private ExplorateurFichiers explorateurFichier;
-
 	
 	private JButton valider = new JButton();
-	private JButton parcourir = new JButton("Parcourir...");
+	private JButton raz = new JButton("Remise à Zéro");
+	private JButton clear = new JButton("Clear");
 
 	public FenetrePrincipale() {
 
@@ -118,31 +115,15 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				boutonVDroit.addActionListener(this);
 				boutonVGauche.addActionListener(this);
 				valider.addActionListener(this);	
-				parcourir.addActionListener(this);
+				raz.addActionListener(this);
+				clear.addActionListener(this);
 				
 				
-				validerSelection.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						if(arg0.getSource() == validerSelection) {
-							System.out.println("-- Fenetre Principale : getSelectedPath --");
-							System.out.println(explorateurFichier.selectedPath);
-							
-							try {
-								//TODO
-							} catch (IOException e) {
-								System.out.println("Impossible d'ouvrir le fichier GCode !!");
-								e.printStackTrace();
-							}
-							editor.repaint();
-						}				
-					}			
-				});				
 				
 				//infos extrudeurs
 				infoPosition.setLayout(new BoxLayout(infoPosition,BoxLayout.Y_AXIS));
 				infoPosition.add(positionLabel);
-				infoPosition.add(parcourir);
+				infoPosition.add(raz);
 				parametre.setLayout(new BoxLayout(parametre,BoxLayout.Y_AXIS));
 				valider.setText("Valider");
 				parametre.add(temperature);
@@ -206,51 +187,44 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					commandes.add(boutonZBas, gbc);
 					
 				
-				editor.setAutoscrolls(true);
+				/*editor.setAutoscrolls(true);
 				editor.setSize(getMaximumSize());
 				JScrollPane editorScrollPane =new JScrollPane(editor);
 				editorScrollPane.setAutoscrolls(true);
 				panneauGauche.add(editorScrollPane);
-				panneauGauche.add(editor,BorderLayout.CENTER);	
-
+				panneauGauche.add(editor,BorderLayout.CENTER);	*/
+					
+					
+					this.console.setLineWrap(true);
+					this.console.setFont(new Font("Monospaced",Font.PLAIN,15));
+				    this.console.setBackground(Color.BLACK);
+				    this.console.setForeground(Color.LIGHT_GRAY);
+				    this.console.setEditable(false);
+				    
+				    
+				    scrollPrompt = new JScrollPane(console,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);    
+				    editorText = new EditeurText();
+					panneauGauche.setLayout(new BoxLayout(panneauGauche,BoxLayout.Y_AXIS));
+					//console.setSize(new Dimension((int)panneauGauche.getWidth(),(int)panneauGauche.getHeight()/10));
+					
+					panneauGauche.add(editorText);
+					panneauGauche.add(scrollPrompt);
+					panneauGauche.add(clear);
+					
 				panneauDroit.add(commandes,BorderLayout.NORTH);
 				panneauDroit.add(parametre,BorderLayout.SOUTH);
 				panneauDroit.add(infoPosition,BorderLayout.CENTER);
-		
-				
+	
 	afficherMenu();
-	commandes.setBackground(Color.CYAN);
-	panneauDroit.setBackground(Color.green);
-	panneauGauche.setBackground(Color.blue);
-	editor.setBackground(Color.ORANGE);	
-	parametre.setBackground(Color.PINK);
-	
-	
-	
 	this.getContentPane().add(panneauGauche,BorderLayout.WEST);
 	this.getContentPane().add(panneauDroit,BorderLayout.EAST);
 	this.setVisible(true);
 		
 	}
 	
-	public void afficherMenu() {
-		quitter.setEnabled(true);
-		quitter.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				System.exit(0);
-			}
-		});
-		
-		this.menuBar.add(fichier);
-		this.menuBar.add(aide);
-		fichier.add(quitter);
-		aide.add(info);
-		
-		this.setJMenuBar(menuBar);
-	}
 	
 	public void actionPerformed(ActionEvent arg0){
-	
+		
 		if(arg0.getSource() == boutonGauche) {
 			this.currentPosition.setX(boutonGauche.position.getX());
 			this.boutonDroit.position.setX(this.boutonGauche.position.getX());
@@ -261,7 +235,6 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.currentPosition.setX(boutonDroit.position.getX());
 			this.boutonGauche.position.setX(this.boutonDroit.position.getX());
 			this.positionLabel.setText(currentPosition.affichePos());
-	
 		}
 		if(arg0.getSource() == boutonHaut) {
 			this.currentPosition.setY(boutonHaut.position.getY());
@@ -303,13 +276,50 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.boutonVDroit.position.setV(this.boutonVGauche.position.getV());
 			this.positionLabel.setText(currentPosition.affichePos());
 		}
-		if(arg0.getSource() == parcourir) {
-			this.explorateurFichier = new ExplorateurFichiers("/");		
-			explorateurFichier.add(validerSelection);
+		if(arg0.getSource() == clear) {
+			this.clearPrompt();
+		}
+		if(arg0.getSource() == raz) {
+			this.boutonBas.setOrigine();
+			this.boutonHaut.setOrigine();
+			this.boutonGauche.setOrigine();
+			this.boutonDroit.setOrigine();
+			this.boutonZBas.setOrigine();
+			this.boutonZHaut.setOrigine();
+			this.boutonUDroit.setOrigine();
+			this.boutonUGauche.setOrigine();
+			this.boutonVGauche.setOrigine();
+			
+			this.currentPosition = new Position();
+			this.positionLabel.setText(currentPosition.affichePos());
+			//this.writePrompt(currentPosition.affichePos());			
 			}
-		}	
-	public void setTextEditor(String text) {
-		this.editor.setText(text);
+		this.writePrompt(currentPosition.affichePos());
+		}		
+	
+	public void afficherMenu() {
+		quitter.setEnabled(true);
+		quitter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				System.exit(0);
+			}
+		});
+		
+		this.menuBar.add(fichier);
+		this.menuBar.add(aide);
+		fichier.add(quitter);
+		aide.add(info);
+		
+		this.setJMenuBar(menuBar);
+	}
+	
+	public void writePrompt(String info) {
+		this.console.setText(this.console.getText().concat(info) + "\n");
+	}
+	
+	public void clearPrompt() {
+		this.console.selectAll();
+		this.console.replaceSelection("");
 	}
 
-}
+}	
