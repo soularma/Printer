@@ -18,7 +18,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import vue.BoutonUSB;
 import vue.FenetrePrincipale;
 
 public class ExplorateurFichiers extends JFrame implements TreeSelectionListener{

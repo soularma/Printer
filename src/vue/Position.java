@@ -1,14 +1,6 @@
 package vue;
 import com.pi4j.util.Console;
 
-import vue.BoutonXDroit;
-import vue.BoutonXGauche;
-import vue.BoutonYBas;
-import vue.BoutonYHaut;
-import vue.BoutonZBas;
-import vue.BoutonZHaut;
-
-
 public class Position {
 
 		public static final int POSITION_X_DEFAUT = 0;

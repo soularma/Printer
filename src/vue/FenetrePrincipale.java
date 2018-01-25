@@ -7,8 +7,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.text.NumberFormat;
 
 import javax.swing.BoxLayout;
@@ -22,11 +20,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.tree.TreePath;
+import raspberry.Observateur;
 
 import vue.explorateur.EditeurText;
+import communication.Uart;
+import raspberry.Temperature;
 
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
@@ -36,6 +35,8 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 		
 	public TreePath path;
+	public Uart uart;
+	public Temperature gestionTemperature = new Temperature();
 	
 	private JPanel panneauGauche = new JPanel(new BorderLayout());
 	private JPanel panneauDroit = new JPanel(new BorderLayout());
@@ -85,6 +86,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 	private JButton valider = new JButton();
 	private JButton raz = new JButton("Remise à Zéro");
 	private JButton clear = new JButton("Clear");
+	private JButton envoyer = new JButton("Envoyer");
 
 	public FenetrePrincipale() {
 
@@ -120,6 +122,8 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				
 				
 				
+				
+				
 				//infos extrudeurs
 				infoPosition.setLayout(new BoxLayout(infoPosition,BoxLayout.Y_AXIS));
 				infoPosition.add(positionLabel);
@@ -141,7 +145,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				parametre.add(extr5);
 				parametre.add(tempExtr5);
 				parametre.add(valider);
-
+				
 				//boutons de commande des axes de l'imprimante
 				commandes.setLayout(new GridBagLayout());
 				GridBagConstraints gbc = new GridBagConstraints();
@@ -186,13 +190,6 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					gbc.gridy = 2;
 					commandes.add(boutonZBas, gbc);
 					
-				
-				/*editor.setAutoscrolls(true);
-				editor.setSize(getMaximumSize());
-				JScrollPane editorScrollPane =new JScrollPane(editor);
-				editorScrollPane.setAutoscrolls(true);
-				panneauGauche.add(editorScrollPane);
-				panneauGauche.add(editor,BorderLayout.CENTER);	*/
 					
 					
 					this.console.setLineWrap(true);
@@ -210,6 +207,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					panneauGauche.add(editorText);
 					panneauGauche.add(scrollPrompt);
 					panneauGauche.add(clear);
+					panneauGauche.add(envoyer);
 					
 				panneauDroit.add(commandes,BorderLayout.NORTH);
 				panneauDroit.add(parametre,BorderLayout.SOUTH);
@@ -276,6 +274,9 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.boutonVDroit.position.setV(this.boutonVGauche.position.getV());
 			this.positionLabel.setText(currentPosition.affichePos());
 		}
+		if(arg0.getSource() == envoyer) {
+			
+		}
 		if(arg0.getSource() == clear) {
 			this.clearPrompt();
 		}
@@ -294,6 +295,25 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.positionLabel.setText(currentPosition.affichePos());
 			//this.writePrompt(currentPosition.affichePos());			
 			}
+			if(arg0.getSource() == valider) {
+				this.tempExtr1.setText(this.tempExtr1.getText());
+				this.tempExtr2.setText(this.tempExtr2.getText());
+				this.tempExtr3.setText(this.tempExtr3.getText());
+				this.tempExtr4.setText(this.tempExtr4.getText());
+				this.tempExtr5.setText(this.tempExtr5.getText());
+				this.tempLitChauffant.setText(this.tempLitChauffant.getText());
+				
+				this.gestionTemperature.setTempExtrudeur(this.tempExtr1.getText(), 1);
+				this.gestionTemperature.setTempExtrudeur(this.tempExtr2.getText(), 2);
+				this.gestionTemperature.setTempExtrudeur(this.tempExtr3.getText(), 3);
+				this.gestionTemperature.setTempExtrudeur(this.tempExtr4.getText(), 4);
+				this.gestionTemperature.setTempExtrudeur(this.tempExtr5.getText(), 5);
+				this.gestionTemperature.setTempLit(this.tempLitChauffant.getText());
+				
+				this.uart.write(this.gestionTemperature.toUart());
+				this.writePrompt(this.gestionTemperature.getInfo());
+			}
+		
 		this.writePrompt(currentPosition.affichePos());
 		}		
 	

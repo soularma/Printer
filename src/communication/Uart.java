@@ -40,7 +40,6 @@ public class Uart{
 		if(serial.isOpen()) {
 			try {
 				serial.write(data);
-				//serial.write(new Date().toString());
 				System.out.println(data);
 			}catch(IOException e){
 				console.print("Unable to write data : " + e.getMessage());
