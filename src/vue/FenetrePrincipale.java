@@ -127,9 +127,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				valider.addActionListener(this);	
 				raz.addActionListener(this);
 				clear.addActionListener(this);
-				
-				
-				
+					
 				
 				
 				//infos extrudeurs
@@ -210,6 +208,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				            	
 				                // écriture des données reçues sur la console
 				                try {
+				                	tempAmbiant.setText(tempAmbiant.getText() + event.getAsciiString());
 				                    writePrompt("[HEX DATA]   " + event.getHexByteString());
 				                    writePrompt("[ASCII DATA] " + event.getAsciiString());
 				                } catch (IOException e) {
