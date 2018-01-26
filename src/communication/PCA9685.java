@@ -91,7 +91,12 @@ public class PCA9685 {
 	public int Axe;
 	public static int step = 32;// De base  32 µsteps/step
 	public static int vitesse;
-	private double rayonMoteur = 0.00226, exposant = -3, nombre = 10, resultat = Math.pow( nombre, exposant ); 
+	private static double rayonMoteur = 0.00226;
+	private static double exposant = -3;
+
+	private static double nombre = 10;
+
+	private static double resultat = Math.pow( nombre, exposant ); 
 	private int denominateur = 60*(int)1.8;
 
 	public PCA9685() throws I2CFactory.UnsupportedBusNumberException {
@@ -130,8 +135,8 @@ public class PCA9685 {
 	public int getStep(){
 		return this.step;
 	}
-	public void setVitesse(int vitesse){
-		this.vitesse = (vitesse*100*30)*(int)(Math.PI*rayonMoteur*resultat);
+	public static void setVitesse(int speed){
+		vitesse = (speed*100*30)*(int)(Math.PI*rayonMoteur*resultat);
 	}
 	public int getVitesse(){
 		return this.vitesse;
@@ -209,7 +214,7 @@ public class PCA9685 {
 	}
 
 	/**
-	 * @param channel 0..15
+	 * @param channel 0..10
 	 * @param pulseMS in ms.
 	 */
 	public void setServoPulse(int channel) {
@@ -247,4 +252,9 @@ public class PCA9685 {
 			this.setPWM(i, 0, 0);
 		}
   }
+	public void setHome(){
+		for(int i = 0; i < 6; i++){
+			this.setPWM(i, 1, 0);
+		}
+	}
 }
