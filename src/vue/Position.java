@@ -20,7 +20,7 @@ public class Position {
 		
 
 		private int x,y,z,u,v,w;
-		private static Position origin = new Position();
+		private Position origin = new Position();
 		private static boolean isMillimetre = true;
 		
 		//Les variables u,v et w ne peuvent être comprisent qu'entre -180 et 180. (Calculé en degré) 
@@ -105,48 +105,48 @@ public class Position {
 			origin.setPosition(new Position());
 		}
 		public void setOrigine(int x, int y, int z, int u, int v, int w){
-			origin.setX(x);
-			origin.setY(y);
-			origin.setZ(z);
-			origin.setU(u);
-			origin.setV(v);
-			origin.setW(w);	
+			this.origin.setX(x);
+			this.origin.setY(y);
+			this.origin.setZ(z);
+			this.origin.setU(u);
+			this.origin.setV(v);
+			this.origin.setW(w);	
 		}
-		public static void setOrigineX(int x ){
-			origin.setX(x);
+		public void setOrigineX(int x ){
+			this.origin.setX(x);
 		}
-		public static void setOrigineY(int y ){
-			origin.setY(y);
+		public void setOrigineY(int y ){
+			this.origin.setY(y);
 		}
-		public static void setOrigineZ(int z ){
-			origin.setZ(z);
+		public void setOrigineZ(int z ){
+			this.origin.setZ(z);
 		}
-		public static void setOrigineU(int u ){
-			origin.setU(u);
+		public void setOrigineU(int u ){
+			this.origin.setU(u);
 		}
-		public static void setOrigineV(int v ){
-			origin.setV(v);
+		public void setOrigineV(int v ){
+			this.origin.setV(v);
 		}
-		public static void setOrigineW(int w ){
-			origin.setW(w);
+		public void setOrigineW(int w ){
+			this.origin.setW(w);
 		}
 		public int getOriginX() {
-			return origin.x;
+			return origin.getX();
 		}
 		public int getOriginY() {
-			return origin.y;
+			return origin.getY();
 		}
 		public int getOriginZ() {
-			return origin.z;
+			return origin.getZ();
 		}
 		public int getOriginU() {
-			return origin.u;
+			return origin.getU();
 		}
 		public int getOriginV() {
-			return origin.v;
+			return origin.getV();
 		}
 		public int getOriginW() {
-			return origin.w;
+			return origin.getW();
 		}
 		
 		public void setPosition(Position position) {

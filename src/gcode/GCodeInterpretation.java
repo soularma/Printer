@@ -5,25 +5,36 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.swing.JTextArea;
+
+import com.pi4j.io.gpio.GpioController;
+
 import java.math.*;
 import communication.PCA9685;
 import vue.Position;
+import vue.FenetrePrincipale;
 import raspberry.Gestion;
+import raspberry.Moteur;
 
 
 
     
 public class GCodeInterpretation extends raspberry.Moteur{
-		private static PCA9685 servoBoard;
-		private static int somme =0, valeur = -1, indice =-1;
-        private static ArrayList<Integer> param = new ArrayList<Integer>();
-        private static ArrayList<Integer> sauvegardeLigne = new ArrayList<Integer>();
-        private static ArrayList<ArrayList<Integer>> sauvegardeFichier = new ArrayList<ArrayList<Integer>>();
-		private static Position position = new Position();
+		private PCA9685 servoBoard;
+		private int somme =0, valeur = -1, indice =-1;
+        private ArrayList<Integer> param = new ArrayList<Integer>();
+        private ArrayList<Integer> sauvegardeLigne = new ArrayList<Integer>();
+        private ArrayList<ArrayList<Integer>> sauvegardeFichier = new ArrayList<ArrayList<Integer>>();
+		private Position position = new Position();
+		private Position origine = new Position();
+		private JTextArea console;
+		private String info;
+		private GpioController gpio;
 
         
         
-        public static void GCodeInterpratation(File fileGcode) {
+        public void GCodeInterpratation(File fileGcode) {
 	      // Nous déclarons nos objets en dehors du bloc try/catch
 	      FileInputStream fis = null;
 	      try {
@@ -83,6 +94,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   default: 
 	            		   valeur =-1;
 	            		   System.out.println("Erreur de paramètre!");
+	            		   info = "Erreur de paramètre";
 	            	   }
 	            	   param.add( valeur);
 	            	   indice = 1;
@@ -102,6 +114,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   sauvegardeLigne.clear();
 	               }else{
 	            	   System.out.println("Erreur de commande");
+	            	   info = "Erreur de commande!";
 	               }
 	            }
 	            //Nous réinitialisons le buffer à vide
@@ -157,8 +170,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   case 3: //cercle sens antihoraire
 	            		   break;
 	            	   case 4 : //pause
-	            		   int tempPause = lecture.get(j+3);
-	            		   PCA9685.waitfor(tempPause);
+	            		   PCA9685.waitfor(lecture.get(j+3));
 	            		   j = lecture.size();
 	            		   break;
 	            	   case 20: //définir les unités en pouces
@@ -185,31 +197,32 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            			   int valeurPosition = lecture.get(k);
 	            			   switch((byte)valeurPosition){
 	            			   case 88:
-	            				   Position.setOrigineX(lecture.get(k+1));
+	            				   origine.setOrigineX(lecture.get(k+1));
 	            				   k= k+2;
 	            				   break;
 	            			   case 89: 
-	            				   Position.setOrigineY(lecture.get(k+1));
+	            				   origine.setOrigineY(lecture.get(k+1));
 	            				   k=k+2;
 	            				   break;
 	            			   case 90:
-	            				   Position.setOrigineZ(lecture.get(k+1));
+	            				   origine.setOrigineZ(lecture.get(k+1));
 	            				   k=k+2;
 	            				   break;
 	            			   case 85:
-	            				   Position.setOrigineU(lecture.get(k+1));
+	            				   origine.setOrigineU(lecture.get(k+1));
 	            				   k=k+2;
 	            				   break;
 	            			   case 86:
-	            				   Position.setOrigineV(lecture.get(k+1));
+	            				   origine.setOrigineV(lecture.get(k+1));
 	            				   k=k+2;
 	            				   break;
 	            			   case 87:
-	            				   Position.setOrigineW(lecture.get(k+1));
+	            				   origine.setOrigineW(lecture.get(k+1));
 	            				   k=k+2;
 	            				   break;
 	            				   default: 
 	            					   System.out.println("Erreur");
+	            					   info = "Erreur position Origine!";
 	            					   k=lecture.size();
 	            			   }
 	            		   }
@@ -245,6 +258,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            				   break;
 	            				   default: 
 	            					   System.out.println("Erreur");
+	            					   info = "Erreur de position!";
 	            					   k1=lecture.size();
 	            			   }
 	            		   }
@@ -260,7 +274,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   break;
 	               case 70:	//vitesse de déplacement, commande F, mm/s
 	            	   System.out.print("Vitesse déplacement");
-	            	   PCA9685.setVitesse(valeurParam);
+	            	   servoBoard.setVitesse(valeurParam);
 	            	   j++;
 	            	   break;
 	            	   /*------------------------------------
@@ -276,12 +290,12 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            		   break;
 	            	   case 82: //definir le mode absolue pour l'extrudeur
 	            		   int x = position.getX(), y = position.getY(), z = position.getZ(), u=position.getU(), v=position.getV(), w=position.getW();
-	            		   Position.setOrigineX(x);
-	            		   Position.setOrigineY(y);
-	            		   Position.setOrigineZ(z);
-	            		   Position.setOrigineU(u);
-	            		   Position.setOrigineV(v);
-	            		   Position.setOrigineW(w);
+	            		   origine.setOrigineX(x);
+	            		   origine.setOrigineY(y);
+	            		   origine.setOrigineZ(z);
+	            		   origine.setOrigineU(u);
+	            		   origine.setOrigineV(v);
+	            		   origine.setOrigineW(w);
 	            		   j=lecture.size();
 	            		   break;
 	            	   /*case 83: //definir le mode relatif pour l'extrudeur
@@ -297,8 +311,8 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   case 105: //retourner température de l'extrudeur et du plateau chauffant
 	            		   String tempExtrudeur = Gestion.getTemperatureExtrud();
 	            		   String tempBed = Gestion.getTemperatureBed();
-	            		   System.out.println("La température de l'extrudeur est de :"+tempExtrudeur);	            		   
-	            		   System.out.println("La température du lit chauffant est de :"+tempBed);	            		  
+	            		   info = "La température de l'extrudeur est de :"+tempExtrudeur;
+	            		   info = "La température du lit chauffant est de :"+tempBed;	            		  
 	            		   j=lecture.size();
 	            		   break;
 	            	   case 106://Allumer les ventilateurs
@@ -312,11 +326,10 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   case 108: //définir la vitesse d'extrusion
 	            		   break;
 	            	   case 109: //define temp of extrudeur and wait
-	            		   int temp = lecture.get(j+3); 
 	            		   int m =0;
-	            		   Gestion.setTemperatureBed(temp);
+	            		   Gestion.setTemperatureBed(lecture.get(j+3));
 	            		   int sommeTemp=0;
-	            		   while(sommeTemp < temp){
+	            		   while(sommeTemp < lecture.get(j+3)){
 	            		   String tempExtrud = Gestion.getTemperatureExtrud();
             			   ArrayList<Integer> paramTemp = new ArrayList<Integer>();
 	            		   while( m <tempExtrud.length()){
@@ -371,13 +384,13 @@ public class GCodeInterpretation extends raspberry.Moteur{
 		            		   taille--;   
 	            		   }
 	            		   
-	            		   System.out.println("La température est de: "+ sommeTemp);
+	            		   info = "La température est de: "+ sommeTemp;
 	            		   }
-	            		   
+	            		   j=lecture.size();
 	            		   break;
 	            	   case 110: //Set Current Line Number
-	            		   int newLine = lecture.get(j+3); 
-	            		   i = newLine;
+	            		   i = lecture.get(j+3);
+	            		   j=lecture.size();
 	            		   break;
 	            	   case 112: // Arret d'urgence
 	            		   Gestion.arretUrgence();
@@ -385,30 +398,168 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            		   j=lecture.size();
 	            		   break;
 	            	   case 114: //Retourner la postion courante des axes
-	            		   System.out.println("Axe X: " + position.getX());
-	            		   System.out.println("Axe Y: " + position.getY());
-	            		   System.out.println("Axe Z: " + position.getZ());
-	            		   System.out.println("Axe U: " + position.getU());
-	            		   System.out.println("Axe V: " + position.getV());
-	            		   System.out.println("Axe W: " + position.getW());
+	            		   info = "Axe X: " + position.getX();
+	            		   info = "Axe Y: " + position.getY();
+	            		   info = "Axe Z: " + position.getZ();
+	            		   info = "Axe U: " + position.getU();
+	            		   info = "Axe V: " + position.getV();
+	            		   info = "Axe W: " + position.getW();
+	            		   j=lecture.size();
 	            		   break;
 	            	   case 116: //Attendre la température
+	            		   int l =0;
+	            		   int sommeTempWait=0;
+	            		   while(sommeTempWait < lecture.get(j+3)){
+	            		   String tempExtrud = Gestion.getTemperatureExtrud();
+            			   ArrayList<Integer> paramTemp = new ArrayList<Integer>();
+	            		   while( l <tempExtrud.length()){
+	            			   switch(tempExtrud.charAt(l)){
+	            			   case '0':
+	            				   paramTemp.add(0);
+	            				   l++;
+	            				   break;
+	            			   case '1':
+	            				   paramTemp.add(1);
+	            				   l++;
+	            				   break;
+	            			   case '2':
+	            				   paramTemp.add(2);
+	            				   l++;
+	            				   break;
+	            			   case '3':
+	            				   paramTemp.add(3);
+	            				   l++;
+	            				   break;
+	            			   case '4':
+	            				   paramTemp.add(4);
+	            				   l++;
+	            				   break;
+	            			   case '5':
+	            				   paramTemp.add(5);
+	            				   l++;
+	            				   break;
+	            			   case '6':
+	            				   paramTemp.add(6);
+	            				   l++;
+	            				   break;
+	            			   case '7':
+	            				   paramTemp.add(7);
+	            				   l++;
+	            				   break;
+	            			   case '8':
+	            				   paramTemp.add(8);
+	            				   l++;
+	            				   break;
+	            			   case '9':
+	            				   paramTemp.add(9);
+	            				   l++;
+	            				   break;
+	            				   default:
+	            					   l++;   
+	            			   }
+	            		   }
+	            		   int taille = paramTemp.size();
+	            		   while( taille != 0){
+		            		   sommeTempWait = (int)Math.pow((double)10, (double)(taille-1))*paramTemp.get(taille) + sommeTempWait;
+		            		   taille--;   
+	            		   }
+	            		   
+	            		   info = "La température est de: "+ sommeTempWait;
+	            		   }
+	            		   j=lecture.size();
 	            		   break;
-	            	   case 117: //afficher un message
-	            		   break;
+	            	   /*case 117: //afficher un message
+	            		   break;*/
 	            	   case 119: //retourner statuts des fin de courses
+	            		   int [] nbEndStop;
+	            		   nbEndStop = Gestion.askEndStop();
+	            		   if(nbEndStop[0]=='0'){
+		            		   info = "Etat capteur fin de course X+: "+nbEndStop[0]+"\n"+"Etat capteur fin de course Y+: "+nbEndStop[1]+"\n"+"Etat capteur fin de course Z+: "+nbEndStop[2]+"\n"+"Etat capteur fin de course U+: "+nbEndStop[3]+"\n"+"Etat capteur fin de course V+: "+nbEndStop[4]+"\n"+"Etat capteur fin de course W+: "+nbEndStop[5]+"\n";
+	            		   }else if(nbEndStop[0]=='1'){
+		            		   info = "Etat capteur fin de course X-: "+nbEndStop[0]+"\n"+"Etat capteur fin de course Y-: "+nbEndStop[1]+"\n"+"Etat capteur fin de course Z-: "+nbEndStop[2]+"\n"+"Etat capteur fin de course U-: "+nbEndStop[3]+"\n"+"Etat capteur fin de course V-: "+nbEndStop[4]+"\n"+"Etat capteur fin de course W-: "+nbEndStop[5]+"\n";
+	            		   }else{
+	            			   info="Erreur de communication";
+	            		   }
+	            		  
+	            		   j=lecture.size();
 	            		   break;
 	            	   case 140: //Définir la température du lit chauffant
+	            		   Gestion.setTemperatureBed(lecture.get(j+3));
+	            		   j=lecture.size();
 	            		   break;
-	            	   case 190: // Wait for bed temperature to reach target temp
+	            	   case 190: // Wait for bed temperature to reach target temp 
+	            		   int l1 =0;
+	            		   int sommeTempWait1=0;
+	            		   while(sommeTempWait1 < lecture.get(j+3)){
+	            		   String tempBed1 = Gestion.getTemperatureBed();
+            			   ArrayList<Integer> paramTempBed = new ArrayList<Integer>();
+	            		   while( l1 <tempBed1.length()){
+	            			   switch(tempBed1.charAt(l1)){
+	            			   case '0':
+	            				   paramTempBed.add(0);
+	            				   l1++;
+	            				   break;
+	            			   case '1':
+	            				   paramTempBed.add(1);
+	            				   l1++;
+	            				   break;
+	            			   case '2':
+	            				   paramTempBed.add(2);
+	            				   l1++;
+	            				   break;
+	            			   case '3':
+	            				   paramTempBed.add(3);
+	            				   l1++;
+	            				   break;
+	            			   case '4':
+	            				   paramTempBed.add(4);
+	            				   l1++;
+	            				   break;
+	            			   case '5':
+	            				   paramTempBed.add(5);
+	            				   l1++;
+	            				   break;
+	            			   case '6':
+	            				   paramTempBed.add(6);
+	            				   l1++;
+	            				   break;
+	            			   case '7':
+	            				   paramTempBed.add(7);
+	            				   l1++;
+	            				   break;
+	            			   case '8':
+	            				   paramTempBed.add(8);
+	            				   l1++;
+	            				   break;
+	            			   case '9':
+	            				   paramTempBed.add(9);
+	            				   l1++;
+	            				   break;
+	            				   default:
+	            					   l1++;   
+	            			   }
+	            		   }
+	            		   int taille = paramTempBed.size();
+	            		   while( taille != 0){
+		            		   sommeTempWait1 = (int)Math.pow((double)10, (double)(taille-1))*paramTempBed.get(taille) + sommeTempWait1;
+		            		   taille--;   
+	            		   }
+	            		   
+	            		   info = "La température du lit est de: "+ sommeTempWait1;
+	            		   }
+	            		   j=lecture.size();
 	            		   	break;
 	            	   case 200: //Set filament diameter
+	            		   ((Moteur) gpio).setDiameter(lecture.get(j+3));
+	            		   j=lecture.size();
 	            		   break;
-	            	   case 201: //Définir l'accélaration maximum d'impréssion
-	            		   break;
-	            	   case 202: //Définir la vitesse maximum d'accélération de déplacement des axes
+	            	   case 202: //Définir l'accélaration maximum d'impréssion
+	            		   servoBoard.setAccelerationMax(lecture.get(j+3));
+	            		   j = lecture.size();
 	            		   break;
 	            	   case 203: //Définir la vitesse maximum de déplacement des axes
+	            		   servoBoard.setVitesseMax(lecture.get(j+3));
+	            		   j = lecture.size();
 	            		   break;
 	            		   default:
 	            			   System.out.println("Erreur de paramètre!");
@@ -418,6 +569,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	               case 80:	//temps de pause, Commande P
 	            	   System.out.print("Pause");
 	            	   PCA9685.waitfor(valeurParam);
+            		   j=lecture.size();
 	            	   break;
 	            /*--------------------------------
 	             *| Coordonnées X, Y, Z, U, V, W |
@@ -425,29 +577,39 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	             */
 	               case 88: //X
 	            	   System.out.print("Axe X");
-	            	   //setX(somme);
 	            	   servoBoard.setChannel(0);
+	            	   position.setX(valeurParam);
+	            	   j++;
 	            	   break;
 	               case 89://Y
 	            	   System.out.print("Axe Y");
-	            	   //setY(somme)
 	            	   servoBoard.setChannel(1);
+	            	   position.setY(valeurParam);
+	            	   j++;
 	            	   break;
 	               case 90://Z
 	            	   System.out.print("Axe Z");
 	            	   servoBoard.setChannel(2);
+	            	   position.setZ(valeurParam);
+	            	   j++;
 	            	   break;
 	               case 85:	//position relative ou axe secondaire, commande U
 	            	   System.out.print("Axe U");
 	            	   servoBoard.setChannel(3);
+	            	   position.setU(valeurParam);
+	            	   j++;
 	            	   break;
 	               case 86:	//position relative ou axe secondaire, commande V
 	            	   System.out.print("Axe V");
 	            	   servoBoard.setChannel(4);
+	            	   position.setV(valeurParam);
+	            	   j++;
 	            	   break;
 	               case 87:	//position relative ou axe secondaire, commande W
 	            	   System.out.print("Axe W");
 	            	   servoBoard.setChannel(5);
+	            	   position.setW(valeurParam);
+	            	   j++;
 	            	   break;
 	            //////////////////////
 	               case 73:	//commande I
@@ -456,28 +618,22 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	               case 74:	//commande J
 	            	   
 	            	   break;
-	               case 68:	//COMMANDE D
-	   
+	              /* case 72:	//utilisé pour la chauffe des resistance du PID, commande H
 	            	   break;
-	               case 72:	//utilisé pour la chauffe des resistance du PID, commande H
-	            	   
-	            	   break;
-	
-	               case 82:	//paramètre pour la température, commande R
-	            	   	
+	            	case 82:	//paramètre pour la température, commande R
 	            	   break;
 	               case 69:	//Longueur de matière extrudée, commande E
-	            	   
-	            	   break;
-	               case 78:	//Commande N
-	            	   
 	            	   break;
 	               case 42:	//Commande *
-	   
-	            	   break;
+	            	   break;*/
+	            	   default:
+	            		   j++;
 	               }
     			   
     		   }
     	   }
+       }
+       public String getInfo(){
+    	   return this.info;
        }
 	}

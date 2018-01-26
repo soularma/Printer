@@ -3,7 +3,6 @@ package communication;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
-import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 import raspberry.Moteur;
 
 import java.io.IOException;
@@ -89,15 +88,15 @@ public class PCA9685 {
 	 * ---------+----------
 	 */
 	public int Axe;
-	public static int step = 32;// De base  32 µsteps/step
-	public static int vitesse;
+	public int step = 32;// De base  32 µsteps/step
+	public int vitesse, vitesse2, vitesseMax;
+	public long tempsVitessePrecedente, tempsVitesse, accelerate, accelerateMax;
 	private static double rayonMoteur = 0.00226;
 	private static double exposant = -3;
-
 	private static double nombre = 10;
-
 	private static double resultat = Math.pow( nombre, exposant ); 
 	private int denominateur = 60*(int)1.8;
+	private Moteur gpio;
 
 	public PCA9685() throws I2CFactory.UnsupportedBusNumberException {
 		this(40); // 0x40 obtained through sudo i2cdetect -y 1
@@ -131,18 +130,51 @@ public class PCA9685 {
 	
 	public void setStep(int step){
 		this.step = step;
+		((Moteur) gpio).setMode(step);
 	}
 	public int getStep(){
 		return this.step;
 	}
-	public static void setVitesse(int speed){
-		vitesse = (speed*100*30)*(int)(Math.PI*rayonMoteur*resultat);
+	public void setVitesse(int speed){
+		if (speed > vitesseMax){
+			this.vitesse2 = this.vitesse;
+			this.tempsVitessePrecedente = this.tempsVitesse;
+			this.tempsVitesse = System.currentTimeMillis();
+			this.vitesse = (vitesseMax*100*30)*(int)(Math.PI*rayonMoteur*resultat);
+			calculateAcceleration();
+		}else{
+			this.vitesse2 = this.vitesse;
+			this.tempsVitessePrecedente = this.tempsVitesse;
+			this.tempsVitesse = System.currentTimeMillis();
+			this.vitesse = (speed*100*30)*(int)(Math.PI*rayonMoteur*resultat);
+			calculateAcceleration();
+		}
+	}
+	public void setVitesseMax(int speedMax){
+		this.vitesseMax = speedMax;
 	}
 	public int getVitesse(){
 		return this.vitesse;
 	}
+	public int getVitesseMax(){
+		return this.vitesseMax;
+	}
 	public void calculFrequenceStep(){
 		this.freq = (getVitesse()*getStep()*360)/denominateur; 
+	}
+	public void calculateAcceleration(){
+		this.accelerate = (this.vitesse - this.vitesse2)/(this.tempsVitesse-this.tempsVitessePrecedente);
+		if(this.accelerate > this.accelerateMax){
+			while(this.accelerate > this.accelerateMax){
+				waitfor(1000);
+			}
+		}
+	}
+	public void setAccelerationMax(int acc){
+		this.accelerateMax = acc;
+	}
+	public long getAccelerationMax(){
+		return this.accelerateMax;
 	}
 	
 

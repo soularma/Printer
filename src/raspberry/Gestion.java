@@ -1,9 +1,6 @@
 package raspberry;
 
-import java.io.IOException;
-import com.pi4j.io.gpio.exception.UnsupportedBoardType;
 import communication.Uart;
-import communication.I2C;
 
 public class Gestion {
 	private static Uart uart;
@@ -30,5 +27,14 @@ public class Gestion {
 	}
 	public static void arretUrgence(){
 		uart.write("Arret d'urgence");
+	}
+	public static int[] askEndStop(){
+		uart.write("statut end stop ");
+		String state = uart.read();
+		int stateEndStop [] = new int [state.length()];
+		for(int i = 0; i<state.length(); i++){
+			stateEndStop[i] = state.charAt(i);
+		}
+		return stateEndStop;
 	}
 }
