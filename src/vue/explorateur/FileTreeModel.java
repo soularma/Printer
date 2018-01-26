@@ -10,6 +10,7 @@ public class FileTreeModel implements TreeModel{
 	public FileTreeModel(File file){
 		root = file;	
 	}	
+	@SuppressWarnings("rawtypes")
 	public List getFichiers(Object parent){
 		File fileParent = (File)parent;
 		File[] fichiers = fileParent.listFiles();

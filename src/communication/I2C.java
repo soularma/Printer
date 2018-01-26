@@ -13,11 +13,12 @@ public class I2C {
 
 	final Console console = new Console();
 	final I2CBus i2c = I2CFactory.getInstance(I2CBus.BUS_1);
-	private byte deviceAddress = (byte)0x00;	
+	private byte deviceAddress = (byte)0x40;	
 	@SuppressWarnings("unused")
 	private byte controlRegister = (byte)0x00;
 	@SuppressWarnings("unused")
 	private byte registerID = (byte)0x00;
+	private String info;
 	
 	
 	public I2C(byte deviceAddress, byte registerID) throws InterruptedException, PlatformAlreadyAssignedException, IOException, UnsupportedBusNumberException {
@@ -27,13 +28,12 @@ public class I2C {
 		this.deviceAddress = deviceAddress;
 		this.registerID = registerID;
 		
-		console.title("<-- Raspberry Pi --> I2C Communication");
-		console.promptForExit();
+		info += "<-- Raspberry Pi --> I2C Communication";
 		
 		I2CDevice device = i2c.getDevice(deviceAddress);
 		deviceID = device.read(registerID);
 		
-		console.print("Reading ID from device... --> " + String.format("0x%02x" , deviceID ));
+		info += "Reading ID from device... --> " + String.format("0x%02x" , deviceID );
 		
 	}
 	
@@ -52,7 +52,7 @@ public class I2C {
 
 		}catch(IOException e) {
 			e.printStackTrace();
-			console.print("Unable to read data !!!");
+			info += "Unable to read data !!!";
 		}
 		return data;
 	}
@@ -60,9 +60,10 @@ public class I2C {
 	public void write(byte data) throws IOException {
 		try {
 			i2c.getDevice(deviceAddress).write(data);
+			info += "Sending data : " + data;
 		}catch(IOException e) {
 			e.printStackTrace();
-			console.print("Unable to write -->" + data);
+			info += "Unable to write -->" + data;
 		}
 	}
 	public void write(byte[] data) throws IOException {
@@ -70,8 +71,12 @@ public class I2C {
 			i2c.getDevice(deviceAddress).write(data);
 		}catch(IOException e) {
 			e.printStackTrace();	
-			console.print("Unable to write -->" + data);
-	}
+			info += "Unable to write -->" + data;
+	}	
 }
+	
+	public String getInfo() {
+		return this.info;
+	}
 
 }

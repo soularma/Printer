@@ -10,7 +10,7 @@ public class Gestion {
 
 	public void main(String args[]) throws UnsupportedBoardType, IOException, InterruptedException {
 
+		@SuppressWarnings("unused")
 		Uart uart = new Uart();
-		uart.write("Test");
 	}
 }

@@ -7,6 +7,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.text.NumberFormat;
 
 import javax.swing.BoxLayout;
@@ -21,11 +22,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.tree.TreePath;
-import raspberry.Observateur;
+
+import com.pi4j.io.gpio.exception.UnsupportedBoardType;
+import com.pi4j.io.serial.SerialDataEvent;
+import com.pi4j.io.serial.SerialDataEventListener;
 
 import vue.explorateur.EditeurText;
 import communication.Uart;
 import raspberry.Temperature;
+import communication.I2C;
 
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
@@ -36,6 +41,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		
 	public TreePath path;
 	public Uart uart;
+	public I2C i2c;
 	public Temperature gestionTemperature = new Temperature();
 	
 	private JPanel panneauGauche = new JPanel(new BorderLayout());
@@ -190,7 +196,28 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 					gbc.gridy = 2;
 					commandes.add(boutonZBas, gbc);
 					
-					
+					try {
+						uart = new Uart();
+						this.uart.serial.addListener(new SerialDataEventListener() {
+				            @Override
+				            public void dataReceived(SerialDataEvent event) {
+
+				               /* il est essentiel de lire les données reçues pour éviter un 
+				                * encombrement du buffer en mémoire inutile
+				                */
+				            	
+				                // écriture des données reçues sur la console
+				                try {
+				                    writePrompt("[HEX DATA]   " + event.getHexByteString());
+				                    writePrompt("[ASCII DATA] " + event.getAsciiString());
+				                } catch (IOException e) {
+				                    e.printStackTrace();
+				                }
+				            }
+				        });
+					}catch (UnsupportedBoardType | InterruptedException e2) {
+						e2.printStackTrace();
+					}
 					
 					this.console.setLineWrap(true);
 					this.console.setFont(new Font("Monospaced",Font.PLAIN,15));
@@ -227,55 +254,67 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.currentPosition.setX(boutonGauche.position.getX());
 			this.boutonDroit.position.setX(this.boutonGauche.position.getX());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		
 		if(arg0.getSource() == boutonDroit) {
 			this.currentPosition.setX(boutonDroit.position.getX());
 			this.boutonGauche.position.setX(this.boutonDroit.position.getX());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonHaut) {
 			this.currentPosition.setY(boutonHaut.position.getY());
 			this.boutonBas.position.setY(this.boutonHaut.position.getY());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonBas) {
 			this.currentPosition.setY(boutonBas.position.getY());
 			this.boutonHaut.position.setY(this.boutonBas.position.getY());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonZBas) {
 			this.currentPosition.setZ(boutonZBas.position.getZ());
 			this.boutonZHaut.position.setZ(this.boutonZBas.position.getZ());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonZHaut) {
 			this.currentPosition.setZ(boutonZHaut.position.getZ());
 			this.boutonZBas.position.setZ(this.boutonZHaut.position.getZ());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonUDroit) {
 			this.currentPosition.setU(boutonUDroit.position.getU());
 			this.boutonUGauche.position.setU(this.boutonUDroit.position.getU());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonUGauche) {
 			this.currentPosition.setU(boutonUGauche.position.getU());
 			this.boutonUDroit.position.setU(this.boutonUGauche.position.getU());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonVDroit) {
 			this.currentPosition.setV(boutonVDroit.position.getV());
 			this.boutonVGauche.position.setV(this.boutonVDroit.position.getV());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == boutonVGauche) {
 			this.currentPosition.setV(boutonVGauche.position.getV());
 			this.boutonVDroit.position.setV(this.boutonVGauche.position.getV());
 			this.positionLabel.setText(currentPosition.affichePos());
+			this.writePrompt(currentPosition.affichePos());
 		}
 		if(arg0.getSource() == envoyer) {
+			this.writePrompt("---------- Test I2C ----------");
 			
+			envoyer.setEnabled(false);
 		}
 		if(arg0.getSource() == clear) {
 			this.clearPrompt();
@@ -310,11 +349,21 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 				this.gestionTemperature.setTempExtrudeur(this.tempExtr5.getText(), 5);
 				this.gestionTemperature.setTempLit(this.tempLitChauffant.getText());
 				
-				this.uart.write(this.gestionTemperature.toUart());
-				this.writePrompt(this.gestionTemperature.getInfo());
+				//Envoi sur l'UART des données de températures	
+				try {
+						uart = new Uart();
+					} catch (UnsupportedBoardType | InterruptedException e2) {
+						e2.printStackTrace();
+					}
+					
+					try {
+						uart.getInfo();
+						uart.write(this.gestionTemperature.toUart());
+					} catch (IllegalStateException | IOException e2) {
+						e2.printStackTrace();
+					}
+					this.writePrompt(this.gestionTemperature.getInfo());
 			}
-		
-		this.writePrompt(currentPosition.affichePos());
 		}		
 	
 	public void afficherMenu() {

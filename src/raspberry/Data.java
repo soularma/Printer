@@ -16,7 +16,7 @@ public class Data implements Observable{
 
 	@Override
 	public void updateObservateur() {
-	    for(Observateur obs : this.listObservateur ) {
+	    for(@SuppressWarnings("unused") Observateur obs : this.listObservateur ) {
 	        
 	    }
 	    
