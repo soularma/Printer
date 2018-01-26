@@ -24,6 +24,7 @@ import javax.swing.JTextArea;
 import javax.swing.tree.TreePath;
 
 import com.pi4j.io.gpio.exception.UnsupportedBoardType;
+import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataEventListener;
 
@@ -31,6 +32,7 @@ import vue.explorateur.EditeurText;
 import communication.Uart;
 import raspberry.Temperature;
 import communication.I2C;
+import communication.PCA9685;
 
 
 public class FenetrePrincipale extends JFrame implements ActionListener{
@@ -41,7 +43,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		
 	public TreePath path;
 	public Uart uart;
-	public I2C i2c;
+	public PCA9685 i2c;
 	public Temperature gestionTemperature = new Temperature();
 	
 	private JPanel panneauGauche = new JPanel(new BorderLayout());
@@ -313,11 +315,20 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 		}
 		if(arg0.getSource() == envoyer) {
 			this.writePrompt("---------- Test I2C ----------");
-			
+			try {
+				i2c = new PCA9685(PCA9685.PCA9685_ADDRESS);
+				this.i2c.writeI2c((byte)0x44);
+				this.writePrompt(this.i2c.getInfo());
+			} catch (UnsupportedBusNumberException e) {
+				this.writePrompt("Error ! Unable to connect PCA9685 !!!");
+				e.printStackTrace();
+			}
 			envoyer.setEnabled(false);
 		}
 		if(arg0.getSource() == clear) {
 			this.clearPrompt();
+			
+			this.envoyer.setEnabled(true);
 		}
 		if(arg0.getSource() == raz) {
 			this.boutonBas.setOrigine();
@@ -334,6 +345,7 @@ public class FenetrePrincipale extends JFrame implements ActionListener{
 			this.positionLabel.setText(currentPosition.affichePos());
 			//this.writePrompt(currentPosition.affichePos());			
 			}
+		
 			if(arg0.getSource() == valider) {
 				this.tempExtr1.setText(this.tempExtr1.getText());
 				this.tempExtr2.setText(this.tempExtr2.getText());
