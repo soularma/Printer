@@ -385,6 +385,12 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            		   j=lecture.size();
 	            		   break;
 	            	   case 114: //Retourner la postion courante des axes
+	            		   System.out.println("Axe X: " + position.getX());
+	            		   System.out.println("Axe Y: " + position.getY());
+	            		   System.out.println("Axe Z: " + position.getZ());
+	            		   System.out.println("Axe U: " + position.getU());
+	            		   System.out.println("Axe V: " + position.getV());
+	            		   System.out.println("Axe W: " + position.getW());
 	            		   break;
 	            	   case 116: //Attendre la température
 	            		   break;
