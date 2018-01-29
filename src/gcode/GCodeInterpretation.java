@@ -6,14 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.swing.JTextArea;
-
 import com.pi4j.io.gpio.GpioController;
-
-import java.math.*;
 import communication.PCA9685;
 import vue.Position;
-import vue.FenetrePrincipale;
 import raspberry.Gestion;
 import raspberry.Moteur;
 
@@ -22,36 +17,45 @@ import raspberry.Moteur;
     
 public class GCodeInterpretation extends raspberry.Moteur{
 		private PCA9685 servoBoard;
-		private int somme =0, valeur = -1, indice =-1;
-        private ArrayList<Integer> param = new ArrayList<Integer>();
-        private ArrayList<Integer> sauvegardeLigne = new ArrayList<Integer>();
-        private ArrayList<ArrayList<Integer>> sauvegardeFichier = new ArrayList<ArrayList<Integer>>();
+		private int somme=0, valeur=-1, indice=-1;
 		private Position position = new Position();
 		private Position origine = new Position();
-		private JTextArea console;
 		private String info;
 		private GpioController gpio;
-
+		
+		/*
+		 * Cette fonction prend en paramètre un fichier, vérifie son extension car l'extension du fichier Gcode peut être .g, .gco or .gcode.
+		 * Si l'extension du fichier est correcte, les fonction GCodeInterpretationLecture(File file) et gestionFichier() sont appelées.
+		 * Dans le cas contraire on affiche un message d'erreur sur l'IHM.
+		 */
+		public GCodeInterpretation(File fileGcode){
+			String fichier = "fileGcode"; 
+			String ext = fichier.substring(fichier.lastIndexOf("."));
+			if(ext!= "g" || ext != "gco" || ext != "gcode"){
+		        ArrayList<ArrayList<Integer>> sauvegardeFichier = GCodeInterpretationLecture(fileGcode);
+				gestionFichier(sauvegardeFichier);
+			}else{
+				info = "Le fichier n'est pas au bon format et ne peut être interprèter";
+			}
+		}
         
+		/*
+		 * Cette fonction prend en paramètre un objet de type fichier et renvoie une ArrayList<ArrayList<Integer>>.
+		 * Elle traite ligne par ligne le fichier en paramètre. 
+		 * Chaque ligne est traduite dans une arraylist et une deuxième arraylist
+		 * engloble les arraylists correspondant au ligne du fichier.
+		 * Le résultat de ce fichier est une ArrayList où à chaque index se trouve une ligne du fichier en  entrée.
+		 */
         
-        public void GCodeInterpratation(File fileGcode) {
-	      // Nous déclarons nos objets en dehors du bloc try/catch
+        public ArrayList<ArrayList<Integer>> GCodeInterpretationLecture(File fileGcode) {
 	      FileInputStream fis = null;
+	      ArrayList<Integer> param = new ArrayList<Integer>();
+	      ArrayList<Integer> sauvegardeLigne = new ArrayList<Integer>();
+	      ArrayList<ArrayList<Integer>> sauvegardeFichier = new ArrayList<ArrayList<Integer>>();
 	      try {
 	         fis = new FileInputStream(fileGcode);
-	         // On crée un tableau de byte pour indiquer le nombre de bytes lus à
-	         // chaque tour de boucle
 	         byte[] buf = new byte[8];
-	         // On crée une variable de type int pour y affecter le résultat de
-	         // la lecture
-	         // Vaut -1 quand c'est fini
-	         int n = 0;
-	         // Tant que l'affectation dans la variable est possible, on boucle
-	         // Lorsque la lecture du fichier est terminée l'affectation n'est
-	         // plus possible !
-	         // On sort donc de la boucle
-
-	         while ((n = fis.read(buf)) >= 0) {
+			while ((fis.read(buf)) >= 0) {
 
 	            for (byte bit : buf) {
 	               System.out.print("\t" + bit + "(" + (char) bit + ")");
@@ -117,11 +121,8 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   info = "Erreur de commande!";
 	               }
 	            }
-	            //Nous réinitialisons le buffer à vide
-	            //au cas où les derniers byte lus ne soient pas un multiple de 8
-	            //Ceci permet d'avoir un buffer vierge à chaque lecture et ne pas avoir de doublon en fin de fichier
+	            //réinitialisation du buffer à vide
 	            buf = new byte[8];
-	            
 	         }
 
 	         System.out.println("Interprétation terminé !");
@@ -144,9 +145,15 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            e.printStackTrace();
 	         }
 	      }
+	      return sauvegardeFichier;
 	   }
         
-       public void gestionFichier(){
+        /*
+         * 
+         */
+        
+       public void gestionFichier(ArrayList<ArrayList<Integer>> sauvegardeFichier){
+    	   int outil = 0;
     	   for(int i = 0; i  < sauvegardeFichier.size(); i++){
     		   ArrayList<Integer> lecture = sauvegardeFichier.get(i);
     		   int j =0;
@@ -185,8 +192,8 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            		   servoBoard.setHome();
 	            		   j = lecture.size();
 	            		   break;
-	            	   case 29: //autolevel : calibration de Z sur 3 pts pour calculer la planéité du plateau.
-	            		   break;
+	            	   /*case 29: //autolevel : calibration de Z sur 3 pts pour calculer la planéité du plateau.
+	            		   break;*/
 	            	   case 90: //position absolue: les coordonnées éxécutées à partir de maintenant sont en rapport à l'origine de la machine
 	            		   position.setOrigine();
 	            		   j=lecture.size();
@@ -270,6 +277,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	               case 84:	//sélection outils commande T
 	            	   System.out.print("Selection outils");
 	            	   servoBoard.setChannel(valeurParam);
+	            	   outil=valeurParam;
 	            	   j++;
 	            	   break;
 	               case 70:	//vitesse de déplacement, commande F, mm/s
@@ -305,7 +313,7 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            		   j=lecture.size();
 	            		   break;
 	            	   case 104: //définir la température de l'extrudeur
-	            		   Gestion.setTemperatureExtrud(valeurParam);
+	            		   Gestion.setTemperatureExtrud(outil, valeurParam);
 	            		   j=lecture.size();
 	            		   break;
 	            	   case 105: //retourner température de l'extrudeur et du plateau chauffant
@@ -323,8 +331,8 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            		   Gestion.fanOff();
 	            		   j=lecture.size();
 	            		   break;
-	            	   case 108: //définir la vitesse d'extrusion
-	            		   break;
+	            	   /*case 108: //définir la vitesse d'extrusion
+	            		   break;*/
 	            	   case 109: //define temp of extrudeur and wait
 	            		   int m =0;
 	            		   Gestion.setTemperatureBed(lecture.get(j+3));
@@ -383,7 +391,6 @@ public class GCodeInterpretation extends raspberry.Moteur{
 		            		   sommeTemp = (int)Math.pow((double)10, (double)(taille-1))*paramTemp.get(taille) + sommeTemp;
 		            		   taille--;   
 	            		   }
-	            		   
 	            		   info = "La température est de: "+ sommeTemp;
 	            		   }
 	            		   j=lecture.size();
@@ -463,7 +470,6 @@ public class GCodeInterpretation extends raspberry.Moteur{
 		            		   sommeTempWait = (int)Math.pow((double)10, (double)(taille-1))*paramTemp.get(taille) + sommeTempWait;
 		            		   taille--;   
 	            		   }
-	            		   
 	            		   info = "La température est de: "+ sommeTempWait;
 	            		   }
 	            		   j=lecture.size();
@@ -473,14 +479,8 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   case 119: //retourner statuts des fin de courses
 	            		   int [] nbEndStop;
 	            		   nbEndStop = Gestion.askEndStop();
-	            		   if(nbEndStop[0]=='0'){
-		            		   info = "Etat capteur fin de course X+: "+nbEndStop[0]+"\n"+"Etat capteur fin de course Y+: "+nbEndStop[1]+"\n"+"Etat capteur fin de course Z+: "+nbEndStop[2]+"\n"+"Etat capteur fin de course U+: "+nbEndStop[3]+"\n"+"Etat capteur fin de course V+: "+nbEndStop[4]+"\n"+"Etat capteur fin de course W+: "+nbEndStop[5]+"\n";
-	            		   }else if(nbEndStop[0]=='1'){
-		            		   info = "Etat capteur fin de course X-: "+nbEndStop[0]+"\n"+"Etat capteur fin de course Y-: "+nbEndStop[1]+"\n"+"Etat capteur fin de course Z-: "+nbEndStop[2]+"\n"+"Etat capteur fin de course U-: "+nbEndStop[3]+"\n"+"Etat capteur fin de course V-: "+nbEndStop[4]+"\n"+"Etat capteur fin de course W-: "+nbEndStop[5]+"\n";
-	            		   }else{
-	            			   info="Erreur de communication";
-	            		   }
-	            		  
+		            		   info = "Etat capteur fin de course X+: "+nbEndStop[7]+"\n"+"Etat capteur fin de course Y+: "+nbEndStop[5]+"\n"+"Etat capteur fin de course Z+: "+nbEndStop[3]+"\n"+"Etat capteur fin de course U+: "+nbEndStop[1]+"\n"+"Etat capteur fin de course V+: "+nbEndStop[11]+"\n"+"Etat capteur fin de course W+: "+nbEndStop[9]+"\n";
+		            		   info += "Etat capteur fin de course X-: "+nbEndStop[6]+"\n"+"Etat capteur fin de course Y-: "+nbEndStop[4]+"\n"+"Etat capteur fin de course Z-: "+nbEndStop[2]+"\n"+"Etat capteur fin de course U-: "+nbEndStop[0]+"\n"+"Etat capteur fin de course V-: "+nbEndStop[10]+"\n"+"Etat capteur fin de course W-: "+nbEndStop[8]+"\n";
 	            		   j=lecture.size();
 	            		   break;
 	            	   case 140: //Définir la température du lit chauffant
@@ -544,7 +544,6 @@ public class GCodeInterpretation extends raspberry.Moteur{
 		            		   sommeTempWait1 = (int)Math.pow((double)10, (double)(taille-1))*paramTempBed.get(taille) + sommeTempWait1;
 		            		   taille--;   
 	            		   }
-	            		   
 	            		   info = "La température du lit est de: "+ sommeTempWait1;
 	            		   }
 	            		   j=lecture.size();
@@ -611,25 +610,21 @@ public class GCodeInterpretation extends raspberry.Moteur{
 	            	   position.setW(valeurParam);
 	            	   j++;
 	            	   break;
-	            //////////////////////
-	               case 73:	//commande I
+	              /* case 73:	//commande I
 	            	   
 	            	   break;
 	               case 74:	//commande J
 	            	   
 	            	   break;
-	              /* case 72:	//utilisé pour la chauffe des resistance du PID, commande H
+	              case 72:	//utilisé pour la chauffe des resistance du PID, commande H
 	            	   break;
 	            	case 82:	//paramètre pour la température, commande R
 	            	   break;
 	               case 69:	//Longueur de matière extrudée, commande E
-	            	   break;
-	               case 42:	//Commande *
 	            	   break;*/
 	            	   default:
 	            		   j++;
-	               }
-    			   
+	               }   
     		   }
     	   }
        }
